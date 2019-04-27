@@ -12,9 +12,17 @@ class BlogController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $data = $request->all();
+
+        $blogs = Blog::where(function ($query) use ($data) {
+            if (!empty($data['id'])) {
+                $query->where('id', $data['id']);
+            }
+        })->with('tag')->get();
+
+        return $blogs;
     }
 
     /**
@@ -35,7 +43,13 @@ class BlogController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->all();
+
+        $validation = $this->validation($data);
+        
+        $newBlog = Blog::create($data);
+
+        return response()->json($newBlog, 201);
     }
 
     /**
@@ -46,7 +60,9 @@ class BlogController extends Controller
      */
     public function show(Blog $blog)
     {
-        //
+        $blog->tag;
+
+        return $blog;
     }
 
     /**
@@ -80,6 +96,25 @@ class BlogController extends Controller
      */
     public function destroy(Blog $blog)
     {
-        //
+        $blog->delete();
+
+        return response('', 204);
+    }
+
+    private function validation(array $data)
+    {
+        $validator = Validator::make($data, [
+            'title' => 'required|string',
+            'user_id' => 'required|integer|exists:users,id',
+            'content' => 'required|string',
+            'image' => 'required|image',
+        ], [
+            'title' => 'Título inválido',
+            'user_id' => 'Usuário inválido',
+            'content' => 'Conteúdo inválido',
+            'image' => 'Imagem inválida',
+        ]);
+
+        return $validator;
     }
 }
