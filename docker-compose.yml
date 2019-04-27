@@ -1,0 +1,39 @@
+version: "2"
+services:
+  front_workshop:
+    build:
+      context: .
+      dockerfile: ./devops/Dockerfile.local
+    ports:
+      - 80:8000
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - cms_workshop
+    tty: true
+    container_name: cms_workshop
+  mysql_workshop:
+    image: mariadb:10.3
+    entrypoint: docker-entrypoint.sh --sql-mode='STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,TRADITIONAL,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'
+    ports:
+      - 3306:3306
+    networks:
+      - cms_workshop
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=123456
+    container_name: mysql_workshop
+  phpmyadmin_workshop:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8181:80
+    networks:
+      - cms_workshop
+    environment:
+      PMA_HOST: mysql_workshop
+    container_name: phpmyadmin_workshop
+networks:
+  cms_workshop:
+    external:
+      name: cms_workshop_network
