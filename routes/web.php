@@ -18,3 +18,6 @@ Route::get('login', function () {
     return view('login');
 });
 Route::post('login', 'LoginController@login');
+Route::get('/blog', function () {
+    return view('internal');
+});
